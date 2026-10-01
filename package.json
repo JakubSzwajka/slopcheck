@@ -46,7 +46,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@eslint/markdown": "8.0.3",
-    "@jakubszwajka/house-rules": "github:JakubSzwajka/house-rules#ea83c2654485eb0088a57c48e93602d6debfe897",
+    "@jakubszwajka/house-rules": "git+https://github.com/JakubSzwajka/house-rules.git#ea83c2654485eb0088a57c48e93602d6debfe897",
     "@types/node": "24.19.0",
     "eslint": "10.11.0",
     "typescript": "5.9.3"

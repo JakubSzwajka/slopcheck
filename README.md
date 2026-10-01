@@ -251,6 +251,8 @@ npm test
 npm run coverage   # tests with node's built-in coverage and minimum thresholds
 ```
 
+CI runs the same four steps on every push to `main` and on every pull request, whatever its base branch (`.github/workflows/check.yml`, Node from `.nvmrc`).
+
 Lint and config rules come from [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/house-rules), pinned to one commit:
 
 - `npm run lint` runs ESLint. `comment-discipline` keeps only one-line whys inside function bodies. `no-broken-relative-links` checks relative links in Markdown against git-tracked files.
