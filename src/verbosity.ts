@@ -1,12 +1,10 @@
 import { hitLines, type Rule } from "./rules.ts";
 import type { Clone, LineRange, PrVerbosity, RuleHit } from "./types.ts";
 
-/** One changed file at head: its code lines and the lines the diff added. */
 export type ChangedSource = { path: string; code: Set<number>; added: Set<number> };
 
 const key = (file: string, line: number) => `${file}:${line}`;
 
-/** Verbosity over added lines only: rule hits and clone lines that fall on added code lines. */
 export function prVerbosity(files: ChangedSource[], hits: RuleHit[], clones: Clone[], rules: Rule[]): PrVerbosity {
 	const byPath = new Map(files.map((file) => [file.path, file]));
 	const isAddedCode = (file: string, line: number) => {
@@ -69,7 +67,6 @@ function addedLinesIn(side: LineRange, isAddedCode: (file: string, line: number)
 	return lines;
 }
 
-/** Whole-snapshot verbosity: flagged and cloned code lines over all code lines. */
 export function snapshotVerbosity(code: Map<string, Set<number>>, flagged: Set<string>, clones: Clone[]): { lines: Set<string>; cloneLines: number } {
 	const lines = new Set(flagged);
 	const cloned = new Set<string>();

@@ -11,9 +11,7 @@ export const RULES_DIR = fileURLToPath(new URL("../rules/", import.meta.url));
 export type Rule = {
 	id: string;
 	message: string;
-	/** Short name for the report summary. */
 	label: string;
-	/** `match` flags every line of the match, `first` only its first line (for rules that wrap a block). */
 	lines: "match" | "first";
 	config: NapiConfig;
 };
@@ -49,23 +47,19 @@ function toRule(file: string, raw: RuleFile): Rule {
 	return { id: raw.id, message: raw.message, label, lines, config };
 }
 
-/**
- * One tree walk per file for all rules: a combined `any` finds candidate nodes,
- * then each candidate is checked against every rule to name the hits. The walk,
- * not the matching, dominates the cost, so this is several times faster than
- * one findAll per rule.
- */
 export function runRules(src: Source, rules: Rule[]): RuleHit[] {
 	if (rules.length === 0) return [];
 	const root = src.root.root();
 	const hits: RuleHit[] = [];
 	const seen = new Set<string>();
+	// One walk for all rules: the walk, not the matching, dominates, so this beats one findAll per rule.
 	for (const node of root.findAll(combined(rules))) {
 		const { start, end } = node.range();
 		for (const rule of rules) {
 			const id = `${rule.id}@${start.index}-${end.index}`;
 			if (seen.has(id) || !node.matches(rule.config)) continue;
 			seen.add(id);
+			// "first" is for rules whose match wraps a whole block, so only its opening line counts.
 			hits.push({ rule: rule.id, file: src.path, start: start.line + 1, end: rule.lines === "first" ? start.line + 1 : end.line + 1 });
 		}
 	}
@@ -74,12 +68,12 @@ export function runRules(src: Source, rules: Rule[]): RuleHit[] {
 
 const combinedCache = new WeakMap<Rule[], NapiConfig>();
 
-/** All rules as one matcher. Each rule's utils get a prefix so two rules may reuse a util name. */
 function combined(rules: Rule[]): NapiConfig {
 	const cached = combinedCache.get(rules);
 	if (cached) return cached;
 	const utils: Record<string, unknown> = {};
 	const any = rules.map((rule) => {
+		// Prefixed util names let two rules reuse a util name.
 		const prefix = `${rule.id}__`;
 		for (const [name, util] of Object.entries(rule.config.utils ?? {})) utils[prefix + name] = prefixMatches(util, prefix);
 		// Constraints are left out here: this only finds candidates, and matches() below applies the full rule.
@@ -96,7 +90,6 @@ function prefixMatches(value: unknown, prefix: string): unknown {
 	return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, key === "matches" && typeof item === "string" ? prefix + item : prefixMatches(item, prefix)]));
 }
 
-/** Code lines a hit covers. */
 export function hitLines(hit: RuleHit, code: Set<number>): number[] {
 	const lines: number[] = [];
 	for (let line = hit.start; line <= hit.end; line++) if (code.has(line)) lines.push(line);

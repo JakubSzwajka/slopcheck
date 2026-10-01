@@ -19,7 +19,6 @@ export type Options = {
 	ccThreshold: number;
 	excludes: string[];
 	repo: boolean;
-	/** Called with a short label as each phase starts, for the progress spinner. */
 	onPhase?: (label: string) => void;
 };
 
@@ -121,7 +120,6 @@ function readBase(git: Git, base: string, file: ChangedFile): string | null {
 	}
 }
 
-/** `git archive ref | tar -x` of just the TypeScript files, into a temp dir removed at the end of the run. */
 async function extract(git: Git, ref: string, paths: string[]): Promise<string> {
 	const dir = makeTemp("slopcheck-snapshot-");
 	const pathspecs = archivePathspecs(paths);

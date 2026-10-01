@@ -14,16 +14,13 @@ function jscpdEntry(): string {
 	return join(dirname(require.resolve("jscpd/package.json")), "run-jscpd.js");
 }
 
-/**
- * Exact clones among the TypeScript files under `dir`, with jscpd's default
- * size limits (50 tokens, 5 lines). Paths come back relative to `dir`.
- */
 export async function findClones(scanDir: string, excludes: string[]): Promise<Clone[]> {
 	// Resolve symlinks (macOS /var -> /private/var) so jscpd's absolute paths relativize cleanly.
 	const dir = realpathSync(scanDir);
 	const out = mkdtempSync(join(tmpdir(), "slopcheck-jscpd-"));
 	try {
 		const ignore = [...DEFAULT_EXCLUDES, ...excludes.map((glob) => (glob.startsWith("**/") ? glob : `**/${glob}`))].join(",");
+		// No --min-tokens or --min-lines: jscpd's defaults (50 tokens, 5 lines) are the clone size limits.
 		const args = [jscpdEntry(), dir, "--pattern", "**/*.{ts,tsx,mts,cts}", "--ignore", ignore, "--reporters", "json", "--output", out, "--silent", "--no-tips", "--absolute"];
 		const result = await runNode(args, dir);
 		if (result.status !== 0) throw new Error(`jscpd failed (exit ${result.status}): ${result.output.trim().slice(0, 500)}`);
@@ -35,8 +32,8 @@ export async function findClones(scanDir: string, excludes: string[]): Promise<C
 	}
 }
 
-/** Async so the main thread stays free (the progress spinner keeps turning). */
 function runNode(args: string[], cwd: string): Promise<{ status: number | null; output: string }> {
+	// Async spawn keeps the main thread free, so the progress spinner keeps turning.
 	return new Promise((resolve, reject) => {
 		const child = spawn(process.execPath, args, { cwd, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, JSCPD_NO_TIPS: "1" } });
 		let stdout = "";

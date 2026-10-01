@@ -2,7 +2,6 @@ import { spawn, spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-/** Head value that stands for the uncommitted working tree. */
 export const WORKTREE = "WORKTREE";
 
 export type ChangedFile = { path: string; oldPath: string | null; status: string };
@@ -82,13 +81,10 @@ export class Git {
 		return ref === WORKTREE ? readFile(join(this.root, path), "utf8") : this.show(ref, path);
 	}
 
-	/**
-	 * Contents of many files at a ref in one `git cat-file --batch` call. Reading
-	 * blobs from git avoids the first-read cost of freshly extracted files.
-	 */
 	readBlobs(ref: string, paths: string[]): Map<string, string> {
 		const blobs = new Map<string, string>();
 		if (paths.length === 0) return blobs;
+		// Reading blobs from git avoids the first-read cost of freshly extracted files.
 		const input = paths.map((path) => `${ref}:${path}\n`).join("");
 		const result = spawnSync("git", ["cat-file", "--batch"], { cwd: this.root, input, maxBuffer: 2 * 1024 * 1024 * 1024 });
 		if (result.status !== 0) throw new GitError(`git cat-file --batch: ${result.stderr.toString().trim()}`);

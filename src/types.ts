@@ -1,15 +1,12 @@
-/** One callable (function, method, arrow, accessor, constructor) in one file version. */
 export type Callable = {
 	key: string;
 	name: string;
 	kind: string;
-	/** 1-based first and last line of the callable's span. */
 	startLine: number;
 	endLine: number;
 	cc: number;
 	sloc: number;
 	mass: number;
-	/** Trimmed source lines of the body, used to pair renamed callables. */
 	body: string[];
 };
 
@@ -27,7 +24,6 @@ export type ErosionChange = {
 	renamedFrom?: string;
 };
 
-/** Inclusive 1-based line range in one file. */
 export type LineRange = { file: string; start: number; end: number };
 
 export type RuleHit = { rule: string; file: string; start: number; end: number };
@@ -64,7 +60,6 @@ export type Report = {
 	ccThreshold: number;
 	files: string[];
 	erosion: ErosionChange[];
-	/** Callables at head that are new or whose CC or SLOC changed. */
 	touched: { callables: number; maxCc: number; maxCcName: string | null };
 	verbosity: PrVerbosity;
 	repo: { base: SnapshotMetrics; head: SnapshotMetrics } | null;

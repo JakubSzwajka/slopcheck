@@ -13,7 +13,6 @@ export const CALLABLE_KINDS = [
 
 const CALLABLE = new Set<string>(CALLABLE_KINDS);
 
-/** Each of these adds one to CC. binary_expression counts only for the logical operators. */
 const DECISION_KINDS = [
 	"if_statement",
 	"for_statement",
@@ -27,8 +26,7 @@ const DECISION_KINDS = [
 ];
 const LOGICAL = new Set(["&&", "||", "??"]);
 
-/** Nodes that sit between a callable and the name it is bound to. */
-const TRANSPARENT = new Set(["parenthesized_expression", "as_expression", "satisfies_expression", "non_null_expression"]);
+const BINDING_WRAPPERS = new Set(["parenthesized_expression", "as_expression", "satisfies_expression", "non_null_expression"]);
 
 export function mass(cc: number, sloc: number): number {
 	return cc * Math.sqrt(sloc);
@@ -37,6 +35,7 @@ export function mass(cc: number, sloc: number): number {
 export function extractCallables(src: Source): Callable[] {
 	const root = src.root.root();
 	const nodes = root.findAll({ rule: { any: CALLABLE_KINDS.map((kind) => ({ kind })) } });
+	// complexityByCallable needs start order, with an outer callable before an inner one that starts at the same index.
 	nodes.sort((a, b) => a.range().start.index - b.range().start.index || b.range().end.index - a.range().end.index);
 	const cc = complexityByCallable(root, nodes);
 	const names = new CallableNames();
@@ -56,11 +55,6 @@ export function extractCallables(src: Source): Callable[] {
 	});
 }
 
-/**
- * CC per callable, in the order of `callables` (sorted by start). Each decision
- * point goes to its innermost enclosing callable only, so branches of a nested
- * function never count toward the outer one.
- */
 function complexityByCallable(root: SgNode, callables: SgNode[]): number[] {
 	const decisions = root
 		.findAll({ rule: { any: DECISION_KINDS.map((kind) => ({ kind })) } })
@@ -78,13 +72,13 @@ function complexityByCallable(root: SgNode, callables: SgNode[]): number[] {
 			stack.push(next++);
 		}
 		while (stack.length > 0 && (spans[stack.at(-1) ?? 0]?.[1] ?? 0) <= at) stack.pop();
+		// Only the innermost callable gets the point, so a nested function's branches never count toward the outer one.
 		const owner = stack.at(-1);
 		if (owner !== undefined) cc[owner] = (cc[owner] ?? 1) + 1;
 	}
 	return cc;
 }
 
-/** Stable qualified keys: Class.method, outer.inner, and a fallback for anonymous callables. */
 class CallableNames {
 	private keys = new Map<number, string>();
 	private used = new Map<string, number>();
@@ -140,11 +134,10 @@ function localName(node: SgNode): string | null {
 	return bindingName(node) ?? fieldText(node, "name");
 }
 
-/** The name a value is bound to: `const x = …`, `key: …`, `this.x = …`, a class field. */
 function bindingName(node: SgNode): string | null {
 	let child = node;
 	let parent = node.parent();
-	while (parent && TRANSPARENT.has(String(parent.kind()))) {
+	while (parent && BINDING_WRAPPERS.has(String(parent.kind()))) {
 		child = parent;
 		parent = parent.parent();
 	}
@@ -165,7 +158,6 @@ function bindingName(node: SgNode): string | null {
 	}
 }
 
-/** `<map cb>` for a callback, `<describe("parses") cb>` when the call starts with a string, `<anon>` otherwise. */
 function anonymousName(node: SgNode): string {
 	const args = node.parent();
 	const call = args?.kind() === "arguments" ? args.parent() : null;
@@ -178,8 +170,8 @@ function anonymousName(node: SgNode): string {
 	return `<${callee} cb>`;
 }
 
-/** `node.field(name)` without the typed-kinds generics, which do not fit a runtime field name. */
 function fieldNode(node: SgNode, name: string): SgNode | null {
+	// The typed-kinds generics do not accept a field name known only at runtime.
 	return node.field(name as never) as unknown as SgNode | null;
 }
 
@@ -191,7 +183,6 @@ function unquote(text: string | null): string | null {
 	return text?.replace(/^(["'`])(.*)\1$/, "$2") ?? null;
 }
 
-/** A string literal cut to 32 characters, quotes kept: `"a long test na…"`. */
 function shorten(literal: string): string {
 	const quote = literal[0] ?? '"';
 	const inner = literal.slice(1, -1);

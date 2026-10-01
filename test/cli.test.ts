@@ -9,7 +9,6 @@ import type { Report } from "../src/types.ts";
 
 const BIN = fileURLToPath(new URL("../bin/slopcheck", import.meta.url));
 
-/** A function whose CC is 1 + branches, with enough lines to have mass. */
 function branchy(name: string, branches: number): string {
 	// The name in every line keeps jscpd from seeing the fixtures as clones of each other.
 	const lines = Array.from({ length: branches }, (_, index) => `\tif (x === ${index}) total += "${name}-${index}".length;`);

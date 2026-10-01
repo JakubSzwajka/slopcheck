@@ -9,11 +9,8 @@ import { parseSource } from "./source.ts";
 import type { Clone, SnapshotMetrics } from "./types.ts";
 import { snapshotVerbosity } from "./verbosity.ts";
 
-/**
- * Erosion and verbosity for a whole tree of TypeScript files on disk.
- * `clones` can be passed in when jscpd already ran on the same tree.
- */
 export async function snapshotMetrics(dir: string, texts: Map<string, string>, rules: Rule[], threshold: number, excludes: string[], clones?: Clone[]): Promise<SnapshotMetrics> {
+	// Callers pass clones when jscpd already ran on the same tree.
 	const allClones = clones ?? (await findClones(dir, excludes));
 	const code = new Map<string, Set<number>>();
 	const flagged = new Set<string>();
@@ -41,7 +38,6 @@ export async function snapshotMetrics(dir: string, texts: Map<string, string>, r
 	};
 }
 
-/** File contents from the working tree, skipping tracked files deleted on disk. */
 export function readTexts(root: string, paths: string[]): Map<string, string> {
 	const texts = new Map<string, string>();
 	for (const path of paths) {
@@ -54,14 +50,10 @@ export function readTexts(root: string, paths: string[]): Map<string, string> {
 	return texts;
 }
 
-/** One whole-repo snapshot: files are read inside the worker, from git or, for WORKTREE, from disk. */
 export type SnapshotJob = { root: string; ref: string; paths: string[]; dir: string; threshold: number; excludes: string[]; clones?: Clone[] };
 
-/**
- * snapshotMetrics on a worker thread. Base and head each get one, so they run
- * side by side and the main thread stays free for the progress spinner.
- */
 export function snapshotMetricsInWorker(job: SnapshotJob): Promise<SnapshotMetrics> {
+	// One worker each for base and head, so they run side by side and the main thread stays free for the spinner.
 	return new Promise((resolve, reject) => {
 		const worker = new Worker(new URL("./snapshot-worker.ts", import.meta.url), { workerData: job });
 		worker.once("message", (metrics: SnapshotMetrics) => resolve(metrics));

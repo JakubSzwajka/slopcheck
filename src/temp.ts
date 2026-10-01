@@ -4,7 +4,6 @@ import { join } from "node:path";
 
 const temps = new Set<string>();
 
-/** A temp dir that `removeTemps` deletes, also on Ctrl-C. */
 export function makeTemp(prefix: string): string {
 	const dir = mkdtempSync(join(tmpdir(), prefix));
 	temps.add(dir);

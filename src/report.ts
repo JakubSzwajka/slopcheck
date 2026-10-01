@@ -5,7 +5,6 @@ const MAX_HITS = 6;
 
 const SYMBOL: Record<ErosionChange["kind"], string> = { crossed: "✗", born: "✗", worse: "▲", improved: "✓" };
 
-/** The key printed before a text report, so the reader has it while the run works. */
 export function formatLegend(ccThreshold: number): string {
 	return `How to read this
   CC         1 + branches in one function: if, loops, case, catch, ?:, &&, ||, ??
@@ -91,7 +90,6 @@ function repoLine(report: Report): string {
 	return `Repo: erosion ${base.erosion.toFixed(3)} → ${head.erosion.toFixed(3)}   verbosity ${base.verbosity.toFixed(3)} → ${head.verbosity.toFixed(3)}`;
 }
 
-/** Left-aligned columns, two spaces apart; empty trailing cells collapse. */
 function table(rows: string[][]): string[] {
 	const widths: number[] = [];
 	for (const row of rows) row.forEach((cell, index) => (widths[index] = Math.max(widths[index] ?? 0, [...cell].length)));
@@ -111,8 +109,8 @@ function round(value: number | undefined): string {
 	return String(Math.round(value ?? 0));
 }
 
-/** Mass growth: whole numbers, one decimal below 10 so a small growth never reads as +0. */
 function delta(value: number): string {
+	// One decimal below 10, so a small mass growth never reads as +0.
 	return value < 10 ? value.toFixed(1) : String(Math.round(value));
 }
 

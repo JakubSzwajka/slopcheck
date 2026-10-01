@@ -1,11 +1,9 @@
 import { Lang, parse, type SgRoot } from "@ast-grep/napi";
 
-/** One parsed file version: its text, tree and the set of source lines. */
 export type Source = {
 	path: string;
 	text: string;
 	root: SgRoot;
-	/** 1-based numbers of non-blank, non-comment lines. */
 	code: Set<number>;
 };
 
@@ -18,11 +16,6 @@ export function parseSource(path: string, text: string): Source {
 	return { path, text, root, code: codeLines(root, text) };
 }
 
-/**
- * Lines holding at least one character that is neither whitespace nor part of
- * a comment. Comment spans come from the tree, so strings and regexes that look
- * like comments are not mistaken for them.
- */
 export function codeLines(root: SgRoot, text: string): Set<number> {
 	const lines = text.split("\n");
 	const masked = new Map<number, Array<[number, number]>>();
@@ -31,6 +24,7 @@ export function codeLines(root: SgRoot, text: string): Set<number> {
 		list.push([from, to]);
 		masked.set(line, list);
 	};
+	// Comment spans come from the tree, so strings and regexes that look like comments are not masked.
 	for (const comment of root.root().findAll({ rule: { kind: "comment" } })) {
 		const { start, end } = comment.range();
 		if (start.line === end.line) {
@@ -57,7 +51,6 @@ function hasCode(line: string, masks: Array<[number, number]>): boolean {
 	return false;
 }
 
-/** Count of code lines inside an inclusive 1-based line range. */
 export function codeLinesIn(code: Set<number>, start: number, end: number): number {
 	let count = 0;
 	for (let line = start; line <= end; line++) if (code.has(line)) count++;
