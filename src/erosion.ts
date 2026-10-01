@@ -1,4 +1,4 @@
-import type { Callable, ErosionChange, Metrics } from "./types.ts";
+import type { Callable, ErosionChange, ErosionChangeKind, Metrics } from "./types.ts";
 
 export type Pair = { before: Callable | null; after: Callable; renamedFrom?: string };
 
@@ -31,22 +31,7 @@ export function matchCallables(before: Callable[], after: Callable[]): Pair[] {
   }
   const unmatchedBefore = before.filter((callable) => !used.has(callable.key));
   // Leftovers pair by body similarity, so a renamed callable keeps its history.
-  const candidates: Array<{ score: number; before: Callable; after: Callable }> = [];
-  for (const next of unmatchedAfter) {
-    for (const previous of unmatchedBefore) {
-      if (previous.kind !== next.kind) continue;
-      const score = similarity(previous.body, next.body);
-      if (score >= RENAME_SIMILARITY) candidates.push({ score, before: previous, after: next });
-    }
-  }
-  candidates.sort((a, b) => b.score - a.score);
-  const renamed = new Map<Callable, Callable>();
-  const taken = new Set<Callable>();
-  for (const candidate of candidates) {
-    if (renamed.has(candidate.after) || taken.has(candidate.before)) continue;
-    renamed.set(candidate.after, candidate.before);
-    taken.add(candidate.before);
-  }
+  const renamed = pickRenames(renameCandidates(unmatchedBefore, unmatchedAfter));
   for (const callable of unmatchedAfter) {
     const previous = renamed.get(callable);
     pairs.push(
@@ -56,6 +41,31 @@ export function matchCallables(before: Callable[], after: Callable[]): Pair[] {
     );
   }
   return pairs;
+}
+
+type RenameCandidate = { score: number; before: Callable; after: Callable };
+
+function renameCandidates(removed: Callable[], added: Callable[]): RenameCandidate[] {
+  const candidates: RenameCandidate[] = [];
+  for (const next of added) {
+    for (const previous of removed) {
+      if (previous.kind !== next.kind) continue;
+      const score = similarity(previous.body, next.body);
+      if (score >= RENAME_SIMILARITY) candidates.push({ score, before: previous, after: next });
+    }
+  }
+  return candidates.sort((a, b) => b.score - a.score);
+}
+
+function pickRenames(candidates: RenameCandidate[]): Map<Callable, Callable> {
+  const renamed = new Map<Callable, Callable>();
+  const taken = new Set<Callable>();
+  for (const candidate of candidates) {
+    if (renamed.has(candidate.after) || taken.has(candidate.before)) continue;
+    renamed.set(candidate.after, candidate.before);
+    taken.add(candidate.before);
+  }
+  return renamed;
 }
 
 export function similarity(a: string[], b: string[]): number {
@@ -75,30 +85,35 @@ export function similarity(a: string[], b: string[]): number {
 }
 
 export function classify(file: string, pairs: Pair[], threshold: number): ErosionChange[] {
-  const changes: ErosionChange[] = [];
-  for (const pair of pairs) {
-    const after = metrics(pair.after);
-    const before = pair.before ? metrics(pair.before) : null;
-    const overAfter = after.cc > threshold;
-    const overBefore = before !== null && before.cc > threshold;
-    let kind: ErosionChange["kind"] | null = null;
-    if (overAfter && before === null) kind = "born";
-    else if (overAfter && !overBefore) kind = "crossed";
-    else if (overAfter && overBefore && after.mass > (before?.mass ?? 0)) kind = "worse";
-    else if (!overAfter && overBefore) kind = "improved";
-    if (!kind) continue;
-    const change: ErosionChange = {
-      kind,
-      file,
-      name: pair.after.key,
-      line: pair.after.startLine,
-      before,
-      after,
-    };
-    if (pair.renamedFrom) change.renamedFrom = pair.renamedFrom;
-    changes.push(change);
-  }
-  return changes;
+  return pairs.map((pair) => changeFor(file, pair, threshold)).filter((change) => change !== null);
+}
+
+function changeFor(file: string, pair: Pair, threshold: number): ErosionChange | null {
+  const after = metrics(pair.after);
+  const before = pair.before ? metrics(pair.before) : null;
+  const kind = changeKind(before, after, threshold);
+  if (!kind) return null;
+  const change: ErosionChange = {
+    kind,
+    file,
+    name: pair.after.key,
+    line: pair.after.startLine,
+    before,
+    after,
+  };
+  if (pair.renamedFrom) change.renamedFrom = pair.renamedFrom;
+  return change;
+}
+
+function changeKind(
+  before: Metrics | null,
+  after: Metrics,
+  threshold: number,
+): ErosionChangeKind | null {
+  if (after.cc <= threshold) return before !== null && before.cc > threshold ? "improved" : null;
+  if (before === null) return "born";
+  if (before.cc <= threshold) return "crossed";
+  return after.mass > before.mass ? "worse" : null;
 }
 
 export function touchedPairs(pairs: Pair[]): Pair[] {

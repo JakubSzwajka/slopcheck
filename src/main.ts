@@ -3,7 +3,7 @@ import { parseArgs, UsageError } from "./args.ts";
 import { type Progress, progressFor, silentProgress } from "./progress.ts";
 import { formatLegend, formatReport } from "./report.ts";
 
-export const HELP = `slopcheck — per-PR structural erosion and verbosity for TypeScript
+export const HELP = `slopcheck: per-PR structural erosion and verbosity for TypeScript
 
 usage:
   slopcheck [base] [head] [--cc-threshold N] [--exclude GLOB]... [--no-repo] [--no-legend] [--json]

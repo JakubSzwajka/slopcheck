@@ -46,35 +46,9 @@ export class Git {
   }
 
   changedFiles(base: string, head: string): ChangedFile[] {
-    const out = this.run([
-      "diff",
-      "--name-status",
-      "-z",
-      "-M",
-      "--no-ext-diff",
-      ...this.range(base, head),
-    ]);
-    const parts = out.split("\0").filter(Boolean);
-    const files: ChangedFile[] = [];
-    for (let index = 0; index < parts.length; ) {
-      const status = parts[index++] ?? "";
-      if (status.startsWith("R") || status.startsWith("C")) {
-        const oldPath = parts[index++] ?? "";
-        const path = parts[index++] ?? "";
-        files.push({
-          status: status[0] ?? "R",
-          path,
-          oldPath: status.startsWith("R") ? oldPath : null,
-        });
-      } else {
-        const path = parts[index++] ?? "";
-        files.push({
-          status: status[0] ?? "M",
-          path,
-          oldPath: status.startsWith("A") ? null : path,
-        });
-      }
-    }
+    const files = parseNameStatus(
+      this.run(["diff", "--name-status", "-z", "-M", "--no-ext-diff", ...this.range(base, head)]),
+    );
     if (head === WORKTREE) {
       for (const path of this.untracked()) files.push({ status: "A", path, oldPath: null });
     }
@@ -180,6 +154,32 @@ export class Git {
       tar.on("error", reject);
     });
   }
+}
+
+function parseNameStatus(out: string): ChangedFile[] {
+  const parts = out.split("\0").filter(Boolean);
+  const files: ChangedFile[] = [];
+  for (let index = 0; index < parts.length; ) {
+    const status = parts[index++] ?? "";
+    const count = isRenameOrCopy(status) ? 2 : 1;
+    files.push(changedFile(status, parts.slice(index, index + count)));
+    index += count;
+  }
+  return files;
+}
+
+function isRenameOrCopy(status: string): boolean {
+  return status.startsWith("R") || status.startsWith("C");
+}
+
+function changedFile(status: string, paths: string[]): ChangedFile {
+  // A copy keeps no old path, so its base side reads as new; an added file has none either.
+  if (isRenameOrCopy(status)) {
+    const [oldPath = "", path = ""] = paths;
+    return { status: status[0] ?? "R", path, oldPath: status.startsWith("R") ? oldPath : null };
+  }
+  const [path = ""] = paths;
+  return { status: status[0] ?? "M", path, oldPath: status.startsWith("A") ? null : path };
 }
 
 function run(cwd: string, args: string[]): string {

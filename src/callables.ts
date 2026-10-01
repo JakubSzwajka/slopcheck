@@ -74,33 +74,65 @@ export function extractCallables(src: Source): Callable[] {
 }
 
 function complexityByCallable(root: SgNode, callables: SgNode[]): number[] {
-  const decisions = root
-    .findAll({ rule: { any: DECISION_KINDS.map((kind) => ({ kind })) } })
-    .filter(
-      (node) =>
-        node.kind() !== "binary_expression" ||
-        LOGICAL.has(fieldNode(node, "operator")?.text() ?? ""),
-    )
-    .map((node) => node.range().start.index)
-    .sort((a, b) => a - b);
-  const spans = callables.map(
-    (node) => [node.range().start.index, node.range().end.index] as const,
+  const sweep = new SpanSweep(
+    callables.map((node) => ({ start: node.range().start.index, end: node.range().end.index })),
   );
-  const cc = spans.map(() => 1);
-  const stack: number[] = [];
-  let next = 0;
-  for (const at of decisions) {
-    while (next < spans.length && (spans[next]?.[0] ?? 0) <= at) {
-      const [start] = spans[next] ?? [0];
-      while (stack.length > 0 && (spans[stack.at(-1) ?? 0]?.[1] ?? 0) <= start) stack.pop();
-      stack.push(next++);
-    }
-    while (stack.length > 0 && (spans[stack.at(-1) ?? 0]?.[1] ?? 0) <= at) stack.pop();
+  const cc = callables.map(() => 1);
+  for (const at of decisionOffsets(root)) {
     // Only the innermost callable gets the point, so a nested function's branches never count toward the outer one.
-    const owner = stack.at(-1);
+    const owner = sweep.ownerOf(at);
     if (owner !== undefined) cc[owner] = (cc[owner] ?? 1) + 1;
   }
   return cc;
+}
+
+function decisionOffsets(root: SgNode): number[] {
+  return root
+    .findAll({ rule: { any: DECISION_KINDS.map((kind) => ({ kind })) } })
+    .filter(isDecision)
+    .map((node) => node.range().start.index)
+    .sort((a, b) => a - b);
+}
+
+function isDecision(node: SgNode): boolean {
+  return (
+    node.kind() !== "binary_expression" || LOGICAL.has(fieldNode(node, "operator")?.text() ?? "")
+  );
+}
+
+type Span = { start: number; end: number };
+
+class SpanSweep {
+  private readonly spans: Span[];
+  private readonly open: number[] = [];
+  private next = 0;
+
+  constructor(spans: Span[]) {
+    this.spans = spans;
+  }
+
+  ownerOf(at: number): number | undefined {
+    while (this.next < this.spans.length && this.startOf(this.next) <= at) this.enter(this.next++);
+    this.closeUpTo(at);
+    return this.open.at(-1);
+  }
+
+  private enter(index: number): void {
+    this.closeUpTo(this.startOf(index));
+    this.open.push(index);
+  }
+
+  private closeUpTo(at: number): void {
+    while (this.open.length > 0 && this.endOf(this.open.at(-1) ?? 0) <= at) this.open.pop();
+  }
+
+  private startOf(index: number): number {
+    return this.spans[index]?.start ?? 0;
+  }
+
+  private endOf(index: number): number {
+    return this.spans[index]?.end ?? 0;
+  }
 }
 
 class CallableNames {
