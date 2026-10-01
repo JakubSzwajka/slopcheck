@@ -8,13 +8,17 @@
   },
   "files": [
     "bin",
-    "src",
+    "dist",
     "rules",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
     "test": "node --test test/**/*.test.ts",
     "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-exclude='node_modules/**' --test-coverage-lines=95 --test-coverage-branches=80 --test-coverage-functions=90 test/**/*.test.ts",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "pins": "house-rules-pins package.json",
