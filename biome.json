@@ -1,20 +1,19 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+	"extends": ["@jakubszwajka/house-rules/biome"],
 	"formatter": {
-		"enabled": true,
 		"indentStyle": "tab",
 		"lineWidth": 180
 	},
 	"linter": {
-		"enabled": true,
 		"rules": {
-			"preset": "none",
 			"nursery": {
 				"noFloatingPromises": "error"
 			}
 		}
 	},
 	"assist": {
+		"enabled": true,
 		"actions": {
 			"source": {
 				"organizeImports": "on"
@@ -22,6 +21,6 @@
 		}
 	},
 	"files": {
-		"includes": ["**", "!!node_modules", "!!package-lock.json", "!!.scratch"]
+		"includes": ["**", "!!node_modules", "!!package-lock.json", "!!.scratch", "!!coverage"]
 	}
 }

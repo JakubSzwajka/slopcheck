@@ -246,9 +246,17 @@ Every rule has cases in `rule-tests/<id>-test.yml` (ast-grep's `valid` /
 
 ```sh
 npm ci
-npm run check   # tsc, biome, file size limits
+npm run check      # tsc, biome, eslint, pins, file size limits
 npm test
+npm run coverage   # tests with node's built-in coverage and minimum thresholds
 ```
+
+Lint and config rules come from [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/house-rules), pinned to one commit:
+
+- `npm run lint` runs ESLint. `comment-discipline` keeps only one-line whys inside function bodies. `no-broken-relative-links` checks relative links in Markdown against git-tracked files.
+- `biome.json` extends the house Biome preset for lint rules and formatting. `tsconfig.json` extends its strict preset.
+- `npm run pins` fails if any dependency in `package.json` is not an exact version or a full commit SHA. Bump versions on purpose, then pin the exact version.
+- `npm run coverage` excludes `test/**` and `node_modules`, and fails if line, branch or function coverage drops below the thresholds in `package.json`. Raise them when coverage goes up.
 
 ## Citing the paper
 
