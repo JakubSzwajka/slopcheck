@@ -1,21 +1,11 @@
 {
-	"compilerOptions": {
-		"target": "es2023",
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
-		"strict": true,
-		"noEmit": true,
-		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"erasableSyntaxOnly": true,
-		"skipLibCheck": true,
-		"types": ["node"]
-	},
-	"include": ["src/**/*.ts", "test/**/*.ts"]
+  "extends": "@jakubszwajka/house-rules/tsconfig/strict.json",
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

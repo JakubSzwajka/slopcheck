@@ -4,21 +4,20 @@ import { join } from "node:path";
 
 const temps = new Set<string>();
 
-/** A temp dir that `removeTemps` deletes, also on Ctrl-C. */
 export function makeTemp(prefix: string): string {
-	const dir = mkdtempSync(join(tmpdir(), prefix));
-	temps.add(dir);
-	return dir;
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  temps.add(dir);
+  return dir;
 }
 
 export function removeTemps(): void {
-	for (const dir of temps) rmSync(dir, { recursive: true, force: true });
-	temps.clear();
+  for (const dir of temps) rmSync(dir, { recursive: true, force: true });
+  temps.clear();
 }
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
-	process.once(signal, () => {
-		removeTemps();
-		process.exit(130);
-	});
+  process.once(signal, () => {
+    removeTemps();
+    process.exit(130);
+  });
 }

@@ -1,48 +1,54 @@
 {
-	"name": "slopcheck",
-	"version": "0.0.1",
-	"description": "Per-PR structural erosion and verbosity report for TypeScript.",
-	"type": "module",
-	"bin": {
-		"slopcheck": "bin/slopcheck"
-	},
-	"files": [
-		"bin",
-		"src",
-		"rules",
-		"README.md"
-	],
-	"scripts": {
-		"test": "node --test test/**/*.test.ts",
-		"typecheck": "tsc --noEmit",
-		"format": "biome format --write .",
-		"check": "tsc --noEmit && biome check . && node scripts/check-file-size.mjs"
-	},
-	"engines": {
-		"node": ">=24"
-	},
-	"os": [
-		"darwin",
-		"linux"
-	],
-	"license": "MIT",
-	"private": true,
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/JakubSzwajka/slopcheck.git"
-	},
-	"homepage": "https://github.com/JakubSzwajka/slopcheck#readme",
-	"bugs": {
-		"url": "https://github.com/JakubSzwajka/slopcheck/issues"
-	},
-	"dependencies": {
-		"@ast-grep/napi": "~0.45.3",
-		"jscpd": "^5.3.3",
-		"yaml": "^2.9.1"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.5.15",
-		"@types/node": "^24.19.0",
-		"typescript": "^5.9.3"
-	}
+  "name": "slopcheck",
+  "version": "0.0.1",
+  "description": "Per-PR structural erosion and verbosity report for TypeScript.",
+  "type": "module",
+  "bin": {
+    "slopcheck": "bin/slopcheck"
+  },
+  "files": [
+    "bin",
+    "src",
+    "rules",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/**/*.test.ts",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-exclude='node_modules/**' --test-coverage-lines=95 --test-coverage-branches=80 --test-coverage-functions=90 test/**/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "pins": "house-rules-pins package.json",
+    "format": "biome format --write .",
+    "check": "tsc --noEmit && biome check . && eslint . && npm run pins && node scripts/check-file-size.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JakubSzwajka/slopcheck.git"
+  },
+  "homepage": "https://github.com/JakubSzwajka/slopcheck#readme",
+  "bugs": {
+    "url": "https://github.com/JakubSzwajka/slopcheck/issues"
+  },
+  "dependencies": {
+    "@ast-grep/napi": "0.45.3",
+    "jscpd": "5.3.3",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@eslint/markdown": "8.0.3",
+    "@jakubszwajka/house-rules": "git+https://github.com/JakubSzwajka/house-rules.git#ea83c2654485eb0088a57c48e93602d6debfe897",
+    "@types/node": "24.19.0",
+    "eslint": "10.11.0",
+    "typescript": "5.9.3"
+  }
 }
