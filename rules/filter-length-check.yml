@@ -1,0 +1,14 @@
+id: filter-length-check
+language: TypeScript
+message: filter(...).length is compared only to test for a match. Use some() (or !some()).
+metadata:
+  label: filter-length
+rule:
+  any:
+    - pattern: $A.filter($$$F).length > 0
+    - pattern: $A.filter($$$F).length !== 0
+    - pattern: $A.filter($$$F).length != 0
+    - pattern: $A.filter($$$F).length >= 1
+    - pattern: $A.filter($$$F).length === 0
+    - pattern: $A.filter($$$F).length == 0
+    - pattern: $A.filter($$$F).length < 1

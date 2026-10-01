@@ -1,0 +1,8 @@
+id: return-await
+valid:
+  - "async function f() { try { return await g(); } catch (e) { return null; } }"
+  - "async function f() { return g(); }"
+  - "async function f() { try { return await g(); } finally { close(); } }"
+invalid:
+  - "async function f() { return await g(); }"
+  - "async function f() { try { const h = async () => { return await g(); }; } catch {} }"

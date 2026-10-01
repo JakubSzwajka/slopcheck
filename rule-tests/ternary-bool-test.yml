@@ -1,0 +1,7 @@
+id: ternary-bool
+valid:
+  - "const x = c ? 1 : 0;"
+  - "const x = c ? true : fallback;"
+invalid:
+  - "const x = c ? true : false;"
+  - "const x = a > b ? false : true;"

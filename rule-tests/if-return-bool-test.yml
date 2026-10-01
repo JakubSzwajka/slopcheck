@@ -1,0 +1,10 @@
+id: if-return-bool
+valid:
+  - "function f(a, b) { if (a) return false; if (b) return false; return true; }"
+  - "function f(c) { if (c) return true; return compute(); }"
+  - "function f(c) { if (c) { log(); return true; } return false; }"
+  - "function f(c) { if (c) return 1; else return 0; }"
+invalid:
+  - "function f(c) { if (c) return true; else return false; }"
+  - "function f(c) { if (c) { return false; } else { return true; } }"
+  - "function f(c) { if (a > b) { return true; }\n  return false; }"

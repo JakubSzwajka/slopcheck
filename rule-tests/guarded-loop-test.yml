@@ -1,0 +1,10 @@
+id: guarded-loop
+valid:
+  - "if (items.length > 0) { for (const item of other) use(item); }"
+  - "if (items.length) { items.forEach(use); done(); }"
+  - "if (items.length) { items.forEach(use); } else { empty(); }"
+  - "if (items.length > 1) { items.forEach(use); }"
+invalid:
+  - "if (items.length > 0) {\n  for (const item of items) {\n    use(item);\n  }\n}"
+  - "if (items.length) { items.forEach(use); }"
+  - "if (list.length !== 0) for (let x of list) use(x);"

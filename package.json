@@ -1,0 +1,48 @@
+{
+	"name": "slopcheck",
+	"version": "0.0.1",
+	"description": "Per-PR structural erosion and verbosity report for TypeScript.",
+	"type": "module",
+	"bin": {
+		"slopcheck": "bin/slopcheck"
+	},
+	"files": [
+		"bin",
+		"src",
+		"rules",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/**/*.test.ts",
+		"typecheck": "tsc --noEmit",
+		"format": "biome format --write .",
+		"check": "tsc --noEmit && biome check . && node scripts/check-file-size.mjs"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"os": [
+		"darwin",
+		"linux"
+	],
+	"license": "MIT",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/JakubSzwajka/slopcheck.git"
+	},
+	"homepage": "https://github.com/JakubSzwajka/slopcheck#readme",
+	"bugs": {
+		"url": "https://github.com/JakubSzwajka/slopcheck/issues"
+	},
+	"dependencies": {
+		"@ast-grep/napi": "~0.45.3",
+		"jscpd": "^5.3.3",
+		"yaml": "^2.9.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.15",
+		"@types/node": "^24.19.0",
+		"typescript": "^5.9.3"
+	}
+}

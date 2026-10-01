@@ -1,0 +1,8 @@
+id: filter-length-check
+valid:
+  - "const count = items.filter(isOpen).length;"
+  - "if (items.filter(isOpen).length > 2) warn();"
+  - "if (items.some(isOpen)) warn();"
+invalid:
+  - "if (items.filter(isOpen).length > 0) warn();"
+  - "const none = items.filter((i) => i.open).length === 0;"

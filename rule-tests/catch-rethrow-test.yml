@@ -1,0 +1,8 @@
+id: catch-rethrow
+valid:
+  - "try { run(); } catch (e) { log(e); throw e; }"
+  - "try { run(); } catch (e) { throw new Error('wrapped', { cause: e }); }"
+  - "try { run(); } catch (e) { throw other; }"
+invalid:
+  - "try { run(); } catch (e) { throw e; }"
+  - "try { run(); } catch (err) { throw err } finally { close(); }"

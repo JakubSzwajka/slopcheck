@@ -1,0 +1,9 @@
+id: async-await-wrapper
+language: TypeScript
+message: An async arrow only awaits one expression and returns it. Drop async and await and return the promise.
+metadata:
+  label: async-await wrapper
+rule:
+  any:
+    - pattern: async ($$$P) => await $E
+    - pattern: async $P => await $E

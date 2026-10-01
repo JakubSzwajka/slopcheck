@@ -1,0 +1,16 @@
+id: catch-rethrow
+language: TypeScript
+message: A catch clause only rethrows the error it caught. Remove the try/catch, or handle the error.
+metadata:
+  label: catch-rethrow
+rule:
+  kind: catch_clause
+  all:
+    - has:
+        field: parameter
+        pattern: $E
+    - has:
+        field: body
+        any:
+          - pattern: "{ throw $E; }"
+          - pattern: "{ throw $E }"

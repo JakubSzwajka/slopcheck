@@ -1,0 +1,19 @@
+id: double-negation-condition
+language: TypeScript
+message: "!! in a condition is redundant: the condition already converts to boolean."
+metadata:
+  label: "!! in condition"
+rule:
+  pattern: "!!$A"
+  any:
+    - inside:
+        kind: parenthesized_expression
+        inside:
+          field: condition
+          any:
+            - kind: if_statement
+            - kind: while_statement
+            - kind: do_statement
+    - inside:
+        kind: ternary_expression
+        field: condition

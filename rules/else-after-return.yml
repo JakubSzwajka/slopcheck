@@ -1,0 +1,24 @@
+id: else-after-return
+language: TypeScript
+message: The if branch ends with return, so the else is not needed. Unindent its body.
+metadata:
+  label: else after return
+  lines: first
+rule:
+  kind: else_clause
+  not:
+    has:
+      kind: if_statement
+  inside:
+    kind: if_statement
+    field: alternative
+    has:
+      field: consequence
+      any:
+        - kind: return_statement
+        - kind: statement_block
+          has:
+            kind: return_statement
+            nthChild:
+              position: 1
+              reverse: true

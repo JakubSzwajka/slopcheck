@@ -1,0 +1,22 @@
+id: single-use-return-var
+language: TypeScript
+message: A variable is declared and returned on the next line and used nowhere else. Return the expression directly.
+metadata:
+  label: single-use var
+  lines: first
+rule:
+  all:
+    - any:
+        - pattern: const $X = $E
+        - pattern: let $X = $E
+    - precedes:
+        pattern: return $X
+    # A value that refers to its own name (a self-returning mock, a recursive closure) needs the binding.
+    - not:
+        has:
+          kind: variable_declarator
+          has:
+            field: value
+            has:
+              pattern: $X
+              stopBy: end

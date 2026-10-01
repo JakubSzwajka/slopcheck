@@ -1,0 +1,11 @@
+id: identity-map
+language: TypeScript
+message: map() with an identity callback returns a copy of the same values. Drop it, or use a plain copy.
+metadata:
+  label: identity map
+rule:
+  any:
+    - pattern: $A.map($X => $X)
+    - pattern: $A.map(($X) => $X)
+    - pattern: "$A.map(($X) => { return $X; })"
+    - pattern: "$A.map(function ($X) { return $X; })"

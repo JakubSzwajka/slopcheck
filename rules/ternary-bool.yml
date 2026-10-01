@@ -1,0 +1,9 @@
+id: ternary-bool
+language: TypeScript
+message: A ternary picks between true and false. Use the condition, or its negation.
+metadata:
+  label: ternary-bool
+rule:
+  any:
+    - pattern: "$C ? true : false"
+    - pattern: "$C ? false : true"

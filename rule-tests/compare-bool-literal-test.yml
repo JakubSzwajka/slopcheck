@@ -1,0 +1,10 @@
+id: compare-bool-literal
+valid:
+  - "if (flag === true) run();"
+  - "if (obj.ok !== false) run();"
+  - "if (mode === 'true') run();"
+  - "const same = (a && b) === true;"
+invalid:
+  - "if ((a > b) === true) run();"
+  - "if (!done === false) run();"
+  - "const off = false === (x instanceof Error);"

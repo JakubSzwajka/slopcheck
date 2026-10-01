@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+const major = Number.parseInt(process.versions.node, 10);
+if (!Number.isFinite(major) || major < 24) {
+	console.error(`slopcheck requires Node.js 24 (this is ${process.versions.node})`);
+	process.exit(2);
+}
+
+const { main } = await import("../src/main.ts");
+await main(process.argv.slice(2));

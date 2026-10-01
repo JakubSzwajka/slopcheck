@@ -1,0 +1,33 @@
+id: guarded-loop
+language: TypeScript
+message: A length check wraps a loop over the same array. A loop over an empty array already does nothing.
+metadata:
+  label: guarded loop
+  lines: first
+rule:
+  kind: if_statement
+  not:
+    has:
+      field: alternative
+      kind: else_clause
+  all:
+    - has:
+        field: condition
+        has:
+          any:
+            - pattern: $A.length
+            - pattern: $A.length > 0
+            - pattern: $A.length !== 0
+            - pattern: $A.length != 0
+            - pattern: $A.length >= 1
+            - pattern: 0 < $A.length
+    - has:
+        field: consequence
+        any:
+          - pattern: for (const $X of $A) $B
+          - pattern: for (let $X of $A) $B
+          - pattern: $A.forEach($$$F);
+          - pattern: "{ for (const $X of $A) $B }"
+          - pattern: "{ for (let $X of $A) $B }"
+          - pattern: "{ $A.forEach($$$F) }"
+          - pattern: "{ $A.forEach($$$F); }"

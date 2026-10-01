@@ -1,0 +1,23 @@
+id: return-await
+language: TypeScript
+message: return await outside a try block adds nothing. Return the promise.
+metadata:
+  label: return await
+utils:
+  function:
+    any:
+      - kind: function_declaration
+      - kind: generator_function_declaration
+      - kind: function_expression
+      - kind: generator_function
+      - kind: arrow_function
+      - kind: method_definition
+rule:
+  kind: return_statement
+  has:
+    kind: await_expression
+  not:
+    inside:
+      kind: try_statement
+      stopBy:
+        matches: function

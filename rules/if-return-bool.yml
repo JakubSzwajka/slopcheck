@@ -1,0 +1,34 @@
+id: if-return-bool
+language: TypeScript
+message: An if statement returns true in one branch and false in the other. Return the condition (or its negation).
+metadata:
+  label: if-return-bool
+rule:
+  any:
+    - pattern: if ($C) return true; else return false;
+    - pattern: if ($C) return false; else return true;
+    - pattern: if ($C) { return true; } else { return false; }
+    - pattern: if ($C) { return false; } else { return true; }
+    - all:
+        - kind: if_statement
+        - not:
+            has:
+              field: alternative
+              kind: else_clause
+        # The last guard of a chain (`if (a) return false; if (b) return false; return true;`) reads fine as is.
+        - not:
+            follows:
+              kind: if_statement
+        - any:
+            - all:
+                - any:
+                    - pattern: if ($C) return true;
+                    - pattern: if ($C) { return true; }
+                - precedes:
+                    pattern: return false;
+            - all:
+                - any:
+                    - pattern: if ($C) return false;
+                    - pattern: if ($C) { return false; }
+                - precedes:
+                    pattern: return true;

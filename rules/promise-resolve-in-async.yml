@@ -1,0 +1,19 @@
+id: promise-resolve-in-async
+language: TypeScript
+message: An async function already wraps its return value in a promise. Return the value.
+metadata:
+  label: Promise.resolve in async
+utils:
+  function:
+    any:
+      - kind: function_declaration
+      - kind: function_expression
+      - kind: arrow_function
+      - kind: method_definition
+rule:
+  pattern: return Promise.resolve($X)
+  inside:
+    matches: function
+    regex: ^(?:(?:static|public|private|protected|override)\s+)*async\b
+    stopBy:
+      matches: function

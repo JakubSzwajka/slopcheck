@@ -1,0 +1,9 @@
+id: single-use-return-var
+valid:
+  - "function f() { const chain = { from: () => chain, where: () => chain }; return chain; }"
+  - "function f() { const x = g(); log(x); return x; }"
+  - "function f() { const x: Result = g(); return x; }"
+  - "function f() { const x = g(); return x + 1; }"
+invalid:
+  - "function f() { const x = g(); return x; }"
+  - "function f() { let total = a + b\n  return total\n}"

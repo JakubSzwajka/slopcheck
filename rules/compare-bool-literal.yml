@@ -1,0 +1,39 @@
+id: compare-bool-literal
+language: TypeScript
+message: A boolean expression is compared with a boolean literal. Use the expression, or its negation.
+metadata:
+  label: compare to bool
+# Only operands that are boolean by syntax alone (a negation, a comparison,
+# instanceof, in). `flag === true` on an optional or unknown value is often
+# deliberate in TypeScript, so it is not flagged.
+utils:
+  boolean-expression:
+    any:
+      - kind: unary_expression
+        regex: ^!
+      - kind: binary_expression
+        has:
+          field: operator
+          regex: ^(===|!==|==|!=|<|>|<=|>=|instanceof|in)$
+rule:
+  kind: binary_expression
+  any:
+    - pattern: $A === true
+    - pattern: $A === false
+    - pattern: $A !== true
+    - pattern: $A !== false
+    - pattern: $A == true
+    - pattern: $A == false
+    - pattern: $A != true
+    - pattern: $A != false
+    - pattern: true === $A
+    - pattern: false === $A
+    - pattern: true !== $A
+    - pattern: false !== $A
+constraints:
+  A:
+    any:
+      - matches: boolean-expression
+      - kind: parenthesized_expression
+        has:
+          matches: boolean-expression

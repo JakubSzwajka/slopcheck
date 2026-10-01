@@ -1,0 +1,9 @@
+id: async-await-wrapper
+valid:
+  - "const f = async (x) => { await g(x); log(); };"
+  - "const f = (x) => g(x);"
+  - "const f = async (x) => (await g(x)).value;"
+invalid:
+  - "const f = async (x) => await g(x);"
+  - "const f = async x => await g(x);"
+  - "list.map(async () => await load());"

@@ -1,0 +1,9 @@
+id: promise-resolve-in-async
+valid:
+  - "function f() { return Promise.resolve(1); }"
+  - "async function f() { return new Promise((r) => { const g = () => { return Promise.resolve(2); }; }); }"
+  - "async function f() { return value; }"
+invalid:
+  - "async function f() { return Promise.resolve(1); }"
+  - "class K { static async load() { return Promise.resolve(cache); } }"
+  - "const f = async () => { return Promise.resolve(3); };"

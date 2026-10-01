@@ -1,0 +1,8 @@
+id: identity-map
+valid:
+  - "const ids = items.map((item) => item.id);"
+  - "const pairs = items.map((a, i) => a);"
+invalid:
+  - "const copy = items.map((item) => item);"
+  - "const copy = items.map(x => x);"
+  - "const copy = items.map(function (x) { return x; });"

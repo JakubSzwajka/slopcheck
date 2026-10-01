@@ -1,0 +1,9 @@
+id: double-negation-condition
+valid:
+  - "const isSet = !!value;"
+  - "if (!value) run();"
+  - "return { ok: !!value };"
+invalid:
+  - "if (!!value) run();"
+  - "while (!!node) node = node.next;"
+  - "const label = !!user ? user.name : 'anon';"
