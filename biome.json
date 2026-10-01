@@ -1,26 +1,22 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-	"extends": ["@jakubszwajka/house-rules/biome"],
-	"formatter": {
-		"indentStyle": "tab",
-		"lineWidth": 180
-	},
-	"linter": {
-		"rules": {
-			"nursery": {
-				"noFloatingPromises": "error"
-			}
-		}
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
-		}
-	},
-	"files": {
-		"includes": ["**", "!!node_modules", "!!package-lock.json", "!!.scratch", "!!coverage"]
-	}
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "extends": ["@jakubszwajka/house-rules/biome"],
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "files": {
+    "includes": ["**", "!!node_modules", "!!package-lock.json", "!!.scratch", "!!coverage"]
+  }
 }
