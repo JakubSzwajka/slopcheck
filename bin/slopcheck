@@ -6,5 +6,5 @@ if (!Number.isFinite(major) || major < 24) {
 	process.exit(2);
 }
 
-const { main } = await import("../src/main.ts");
+const { main } = await import("../dist/main.js");
 await main(process.argv.slice(2));

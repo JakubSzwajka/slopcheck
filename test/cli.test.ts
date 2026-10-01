@@ -7,7 +7,7 @@ import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import type { Report } from "../src/types.ts";
 
-const BIN = fileURLToPath(new URL("../bin/slopcheck", import.meta.url));
+const BIN = fileURLToPath(new URL("./support/cli-entry.ts", import.meta.url));
 
 function branchy(name: string, branches: number): string {
   // The name in every line keeps jscpd from seeing the fixtures as clones of each other.

@@ -58,8 +58,29 @@ Node 24 or newer, git, and macOS or Linux.
 
 ## Install
 
-slopcheck is not published to npm. Clone it and put `bin/slopcheck` on your
-PATH:
+slopcheck is not published to npm. There are two ways to install it.
+
+### From git, pinned to a commit
+
+Install it as a dev dependency of your project, pinned to one commit:
+
+```sh
+npm i -D git+https://github.com/JakubSzwajka/slopcheck.git#<sha>
+npx slopcheck --help
+```
+
+Or install it globally the same way:
+
+```sh
+npm i -g git+https://github.com/JakubSzwajka/slopcheck.git#<sha>
+slopcheck --help
+```
+
+npm runs the `prepare` script during a git install, which compiles `src/` to `dist/`.
+
+### From a clone
+
+Clone it and put `bin/slopcheck` on your PATH:
 
 ```sh
 git clone https://github.com/JakubSzwajka/slopcheck.git
@@ -69,8 +90,8 @@ mkdir -p ~/.local/bin
 ln -s "$PWD/bin/slopcheck" ~/.local/bin/slopcheck
 ```
 
-Any directory on your PATH works in place of `~/.local/bin`. Node runs the
-TypeScript sources directly, so there is no build step. Check it with
+Any directory on your PATH works in place of `~/.local/bin`. `npm ci` also runs
+the build, so `bin/slopcheck` works right away. Check it with
 `slopcheck --help`.
 
 ## Usage
@@ -245,13 +266,19 @@ Every rule has cases in `rule-tests/<id>-test.yml` (ast-grep's `valid` /
 ## Develop
 
 ```sh
-npm ci
+npm ci             # also runs the build through prepare
+npm run build      # compile src/ to dist/
 npm run check      # tsc, biome, eslint, pins, file size limits
 npm test
 npm run coverage   # tests with node's built-in coverage and minimum thresholds
+npm run pack:smoke # npm pack, install the tarball in a temp dir, run it on a tiny diff
 ```
 
-CI runs the same four steps on every push to `main` and on every pull request, whatever its base branch (`.github/workflows/check.yml`, Node from `.nvmrc`).
+Tests and coverage run against `src/` directly, with no build. `bin/slopcheck`
+runs the compiled `dist/`, so run `npm run build` after you edit `src/` before
+you run the bin locally.
+
+CI runs the same six steps on every push to `main` and on every pull request, whatever its base branch (`.github/workflows/check.yml`, Node from `.nvmrc`).
 
 Lint and config rules come from [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/house-rules), pinned to one commit:
 

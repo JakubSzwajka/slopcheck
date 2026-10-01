@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { extname, join } from "node:path";
 import { Worker } from "node:worker_threads";
 import { extractCallables } from "./callables.ts";
 import { findClones } from "./clones.ts";
@@ -72,9 +72,13 @@ export type SnapshotJob = {
 export function snapshotMetricsInWorker(job: SnapshotJob): Promise<SnapshotMetrics> {
   // One worker each for base and head, so they run side by side and the main thread stays free for the spinner.
   return new Promise((resolve, reject) => {
-    const worker = new Worker(new URL("./snapshot-worker.ts", import.meta.url), {
-      workerData: job,
-    });
+    // Same extension as this module: .ts when run from src/, .js when compiled to dist/.
+    const worker = new Worker(
+      new URL(`./snapshot-worker${extname(import.meta.url)}`, import.meta.url),
+      {
+        workerData: job,
+      },
+    );
     worker.once("message", (metrics: SnapshotMetrics) => resolve(metrics));
     worker.once("error", reject);
     worker.once("exit", (code) => {
